@@ -69,27 +69,7 @@ namespace ProtocolTrueCraft.IO
 
         public void WriteVarInt(VarInt value)
         {
-            WriteByteArray(GetVarIntBytes(value));
-        }
-
-        // BUG: Is broken?
-        public static byte[] GetVarIntBytes(int _value)
-        {
-            uint value = (uint)_value;
-
-            var bytes = new List<byte>();
-            while (true)
-            {
-                if ((value & 0xFFFFFF80u) == 0)
-                {
-                    bytes.Add((byte)value);
-                    break;
-                }
-                bytes.Add((byte)(value & 0x7F | 0x80));
-                value >>= 7;
-            }
-
-            return bytes.ToArray();
+            throw new NotImplementedException();
         }
 
         // -- Boolean
@@ -106,7 +86,7 @@ namespace ProtocolTrueCraft.IO
             WriteByte(unchecked((byte)value));
         }
 
-        public void WriteByte(byte value)
+        void IProtocolStream.WriteByte(byte value)
         {
             if (_buffer != null)
             {
@@ -275,7 +255,7 @@ namespace ProtocolTrueCraft.IO
 
         // -- Read methods
 
-        public byte ReadByte()
+        byte IProtocolStream.ReadByte()
         {
             var buffer = new byte[1];
 
@@ -356,8 +336,6 @@ namespace ProtocolTrueCraft.IO
         }
         
 
-        #region Purge
-
         private void Purge(bool async = false)
         {
             if (async)
@@ -367,26 +345,6 @@ namespace ProtocolTrueCraft.IO
 
             _buffer = null;
         }
-
-        private void PurgeModernWithoutCompression(bool async = false)
-        {
-            var lenBytes = GetVarIntBytes(_buffer.Length);
-
-            var tempBuff = new byte[_buffer.Length + lenBytes.Length];
-
-            Buffer.BlockCopy(lenBytes, 0, tempBuff, 0, lenBytes.Length);
-            Buffer.BlockCopy(_buffer, 0, tempBuff, lenBytes.Length, _buffer.Length);
-
-            if (async)
-                SendAsync(tempBuff, 0, tempBuff.Length);
-            else
-                Send(tempBuff, 0, tempBuff.Length);
-
-            _buffer = null;
-        }
-
-
-        #endregion
 
 
         public void Dispose()

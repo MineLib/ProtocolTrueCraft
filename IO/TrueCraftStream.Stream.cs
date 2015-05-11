@@ -10,6 +10,13 @@ namespace ProtocolTrueCraft.IO
             throw new NotImplementedException();
         }
 
+        public override int ReadByte()
+        {
+            var arr = new byte[1];
+            Receive(arr, 0, arr.Length);
+            return arr[0];
+        }
+
         public override int Read(byte[] buffer, int offset, int count)
         {
             return Receive(buffer, offset, count);
@@ -23,6 +30,12 @@ namespace ProtocolTrueCraft.IO
         public override void SetLength(long value)
         {
             throw new NotImplementedException();
+        }
+
+        public override void WriteByte(byte value)
+        {
+            var arr = new byte[] {value};
+            Write(arr, 0, arr.Length);
         }
 
         public override void Write(byte[] buffer, int offset, int count)
